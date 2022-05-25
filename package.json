@@ -10,6 +10,7 @@
   "author": "Asif Nawaj Khan",
   "license": "ISC",
   "dependencies": {
+    "@hapi/joi": "^17.1.1",
     "bcryptjs": "^2.4.3",
     "busboy": "^1.6.0",
     "cookie-parser": "^1.4.6",

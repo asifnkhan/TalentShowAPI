@@ -6,6 +6,7 @@ const dbConnection = require('./helpers/db-connection');
 const userRoute = require('./routes/user.route');
 const swaggerRoute = require('./helpers/swagger');
 const logger = require('morgan');
+const errorHandler = require('./middlewares/error-handler');
 
 app.use(cors({ origin: (origin, callback) => callback(null, true), credentials: true }));
 
@@ -30,49 +31,15 @@ app.get('/', (req, res) => {
         <h1>Welcome to Talent Shows</h1>
         <p>This is a sample application for Talent Shows</p>
 
-        <h2>Uage:</h2>
-
-        <p>To register a user:</p>
-        <pre>
-            POST /users/register
-            {
-                "fullName": "John Doe",
-                "email": "
-                "password": "password",
-                "dob": "01/01/1990",
-                "address": "123 Main St"
-            }
-        </pre>
-
-        <p>To login a user:</p>
-        <pre>
-            POST /users/login
-            {
-                "email": "
-                "password": "password"
-            }
-        </pre>
-
-        <p>To get all users:</p>
-        <pre>
-            GET /users
-        </pre>
-
-        <p>To apply with a video:</p>
-        <pre>
-            POST /users/apply
-            Content-Type: multipart/form-data
-            Max file size: 100MB
-            File Type: video/*
-            {
-                "video": "video.mp4"
-            }
-        </pre>
+        <h2>Usage and Documentation</h2>
+        <a href="/api-docs">Swagger API</a>
     `);
 });
 
 // swagger docs route
 app.use('/api-docs', swaggerRoute);
 app.use('/users', userRoute);
+
+app.use(errorHandler);
 
 module.exports = app;

@@ -61,7 +61,6 @@ register = (req, res) => {
 // /users/login
 login = (req, res) => {
     const { email, password } = req.body;
-    console.log(email, password);
     accountService.authenticate({ email, password })
         .then(({ refreshToken, ...account }) => {
             setTokenCookie(res, refreshToken);
@@ -121,11 +120,11 @@ logout = (req, res) => {
 // returns the application id
 // /users/apply
 apply = async (req, res) => {
-    // Check if already applied
-    const checkUser = await User.findById(req.user.id)
-
+    // Check if user exists
+    const checkUser = await User.findById(req.user.id);
     if (!checkUser) { res.status(401).json({ message: 'User not found' }) }
 
+    // Check if user has already applied, same user can not apply more than once
     if (checkUser && checkUser.applicationId) {
         return res.status(400).json({
             message: 'Already applied',
@@ -135,10 +134,13 @@ apply = async (req, res) => {
 
     const bb = busboy({ headers: req.headers, limits: { fileSize: 100 * 1024 * 1024 } });
 
-    bb.on('file', async (name, file, info, mimetype) => {
+    bb.on('file', async (name, file, info) => {
+        const { filename, encoding, mimeType } = info;
         // Only allow video files
         let reg = /video/;
-        if (reg.test(mimetype)) {
+        if (!reg.test(mimeType)) {
+            console.log(mimeType);
+            console.log(reg.test(mimeType));
             return res.status(400).json({
                 message: 'Invalid file type'
             });
@@ -147,7 +149,8 @@ apply = async (req, res) => {
         const bucket = dbConnection.getBucket();
         const uploadStream = bucket.openUploadStream(new Date().getTime());
 
-        file.on('limit', () => {
+        file.on('limit', async () => {
+            await uploadStream.abort();
             res.status(400).json({
                 message: 'File size is too large. Max size: 100 MB'
             });
@@ -165,7 +168,6 @@ apply = async (req, res) => {
                     user.applicationId = process.env.PREFIX + new Date().getTime();
                     user.video = data._id;
                     user.updatedAt = new Date().toISOString();
-                    console.log(user);
                     User.updateOne({ _id: req.user.id }, user)
                         .then(() => {
                             res.status(200).json({
@@ -185,6 +187,7 @@ apply = async (req, res) => {
                         error: err
                     });
                 });
+            uploadStream.end();
         });
 
         file.pipe(uploadStream);

@@ -8,6 +8,42 @@ servers:
     description: Local development server
 
 paths:
+  /users/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                  example: "Asif Khan"
+                email:
+                  type: string
+                  example: "asifkhan362@gmail.com"
+                password:
+                  type: string
+                  example: "123456"
+                dob:
+                  type: string
+                  example: "01/01/1990"
+                address:
+                  type: string
+                  example: "123 Main St."
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User created successfully"
   /users/login:
     post:
       summary: Authenticate user credentials and return a JWT token and a cookie with a refresh token
